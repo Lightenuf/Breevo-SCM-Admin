@@ -1,0 +1,359 @@
+/* =========================
+   테마 — PLAVE 공식 사이트 스타일 참고
+   · 카드 배경/그림자 없음, 얇은 선으로만 구분
+   · 색은 상태 뱃지에만 최소한으로, 나머지는 흑백·그레이
+   · 여백 넉넉하게
+   · 메뉴는 얇은 폰트 + 넓은 자간
+
+   admin.css 다음에 불러와서 외관만 덮어씁니다.
+   index.html 에서 이 파일 링크 한 줄만 지우면 원래 디자인으로 복귀합니다.
+   기능·데이터·문구는 건드리지 않습니다.
+   ========================= */
+
+:root {
+  --ink: #17131199;
+  --ink: #171311;
+  --m1: #A59E9B;
+  --m2: #6B6360;
+  --line: rgba(23,19,17,.08);
+  --soft: #FBFAF9;
+  --accent: #C9303B;
+  --accent-soft: #FBEDED;
+  --sage: #6B7A55;
+  --sage-soft: #F1F4EC;
+  --glass: transparent;
+  --shadow: none;
+}
+
+body {
+  background: #fff;
+  letter-spacing: -.003em;
+}
+
+/* ── 상단 ─────────────────────────── */
+
+.app {
+  max-width: 1640px;
+  padding: 0 56px 120px;
+}
+
+.top {
+  padding: 30px 0 26px;
+  border-bottom: 0;
+}
+
+.brand {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+
+/* 알약 배경 제거 → 얇은 글자 메뉴 */
+.nav {
+  gap: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.nav button {
+  padding: 4px 0;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: .14em;
+  color: var(--m1);
+  background: transparent;
+  border-radius: 0;
+  transition: color .18s;
+}
+
+.nav button:hover {
+  color: var(--m2);
+}
+
+.nav button.active {
+  background: transparent;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.nav .badge {
+  min-width: 14px;
+  padding: 0 4px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0;
+  background: var(--accent);
+  color: #fff;
+}
+
+.nav button.active .badge {
+  background: var(--accent);
+  color: #fff;
+}
+
+.icon-btn {
+  border: 0;
+  background: transparent;
+  color: var(--m1);
+  transition: color .18s;
+}
+
+.icon-btn:hover,
+.icon-btn.active {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink);
+}
+
+/* ── 제목 ─────────────────────────── */
+
+.main {
+  gap: 0;
+  padding-top: 60px;
+}
+
+.header {
+  padding-bottom: 34px;
+}
+
+.title {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+
+.desc,
+.meta {
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: .1em;
+  color: var(--m1);
+}
+
+/* ── 카드: 배경·그림자 없이 얇은 선으로만 구분 ── */
+
+.card {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+  padding-bottom: 46px;
+  margin-bottom: 46px;
+}
+
+.card:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+
+.card.metrics {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0;
+}
+
+.metric {
+  padding: 4px 26px 34px 0;
+}
+
+.section-head {
+  padding-bottom: 10px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+.muted {
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: .04em;
+  color: var(--m1);
+}
+
+/* ── 표: 선 최소화, 행 간격 확대 ───────── */
+
+.tr {
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+
+.th {
+  padding: 6px 0 14px;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: .12em;
+  color: var(--m1);
+}
+
+.tr:not(.th):hover {
+  background: var(--soft);
+}
+
+.main-text {
+  font-weight: 500;
+}
+
+.cell.strong {
+  font-weight: 500;
+}
+
+/* ── 구분(종류) 뱃지: 색 빼고 흑백 ───────── */
+
+.kind-badge {
+  padding: 4px 0;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .02em;
+  background: transparent;
+  color: var(--m2);
+}
+
+.kind-sponsor,
+.kind-amb,
+.kind-event,
+.kind-sample,
+.kind-b2b,
+.kind-olive,
+.kind-resend {
+  background: transparent;
+  color: var(--m2);
+}
+
+/* ── 상태 뱃지: 여기에만 색 ───────────── */
+
+.badge-status {
+  padding: 5px 12px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  border-radius: 999px;
+}
+
+.status-wait {
+  color: var(--m1);
+  background: #F6F4F3;
+}
+
+.status-today {
+  color: #35506E;
+  background: #EDF1F6;
+}
+
+.status-over {
+  color: #B82F39;
+  background: #FBEDED;
+}
+
+.status-done {
+  color: #6B7A55;
+  background: #F1F4EC;
+}
+
+.status-hold,
+.status-missing {
+  color: #A8683F;
+  background: #FAF1E9;
+}
+
+/* ── 버튼: 평평하게 ─────────────────── */
+
+.btn {
+  border-color: var(--line);
+  background: transparent;
+  font-weight: 400;
+  letter-spacing: .02em;
+  box-shadow: none;
+  transition: background .18s, border-color .18s;
+}
+
+.btn:hover {
+  background: var(--soft);
+  border-color: rgba(23,19,17,.16);
+}
+
+.btn.dark {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+  font-weight: 500;
+}
+
+.btn.dark:hover {
+  background: #000;
+}
+
+.btn[disabled] {
+  opacity: .32;
+}
+
+.check {
+  border-color: rgba(23,19,17,.18);
+  background: transparent;
+}
+
+.check.on {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* ── 드로어·모달은 배경 유지 (떠 있는 화면) ── */
+
+.drawer {
+  border: 0;
+  border-radius: 20px 0 0 20px;
+  box-shadow: -20px 0 70px rgba(23,19,17,.10);
+}
+
+.drawer-title {
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+
+.drawer-block {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.drawer-block h4 {
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: .12em;
+  color: var(--m1);
+}
+
+.manual-modal,
+.request-preview-sheet {
+  border: 0;
+  border-radius: 20px;
+  box-shadow: 0 26px 80px rgba(23,19,17,.16);
+}
+
+.manual-modal-title {
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+
+.manual-modal-desc {
+  font-weight: 300;
+  letter-spacing: .02em;
+  color: var(--m1);
+}
+
+/* ── 달력: 주말 열에 옅은 톤 ─────────── */
+
+.day {
+  border-color: var(--line);
+}
+
+.day.today .day-number {
+  background: var(--ink);
+  color: #fff;
+}

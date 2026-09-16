@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Breevo 발주 어드민</title>
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+  >
+
+  <link rel="stylesheet" href="css/admin.css">
+
+  <!-- 테마: 이 줄을 지우면 원래 디자인으로 즉시 복귀합니다 -->
+  <link rel="stylesheet" href="css/theme.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
+</head>
+
+<body>
+
+<div id="app"></div>
+<div id="overlay"></div>
+
+<!-- 접속 설정 (Supabase 주소·키) -->
+<script src="js/config.js"></script>
+
+<!-- 발주서·요청서 원본 XLSX 양식과 고정 상수 -->
+<script src="js/templates.js"></script>
+
+<!-- 샘플 데이터 (Supabase 연결 전 화면 확인용) -->
+<script src="js/sample-data.js"></script>
+
+<!-- 상태값, 공통 유틸, 모달 화면 -->
+<script src="js/core.js"></script>
+
+<!-- 데이터 연결부 (기존 Apps Script 호출을 대체) -->
+<script src="js/data.js"></script>
+
+<!-- 목록·상세 화면, XLSX 생성, 클릭 동작 -->
+<script src="js/views.js"></script>
+
+</body>
+</html>
