@@ -848,7 +848,7 @@ async function gasComplete(ids) {
    4. 수동 발주 등록
    ========================= */
 
-function gasCreateManualOrder(payload) {
+async function gasCreateManualOrder(payload) {
   if (IS_SAMPLE_MODE) {
     return Promise.reject(
       new Error(
@@ -857,7 +857,80 @@ function gasCreateManualOrder(payload) {
       )
     );
   }
-  return notConnected('수동 발주 등록');
+
+  const kind = String(payload?.kind || '').trim();
+  const name = String(payload?.name || '').trim();
+  const phone = String(payload?.phone || '').trim();
+  const addr = String(payload?.addr || '').trim();
+  const company = String(payload?.company || '').trim();
+
+  /* 기존 서버(createManualOrder)의 검사 규칙을 그대로 옮겼습니다. */
+  if (!kind) {
+    throw new Error('협찬 / 엠베서더 / 이벤트 / 오배송건 재발송 / 샘플 / B2B 중 등록 채널을 선택해주세요.');
+  }
+  if (kind === 'b2b' && !company) {
+    throw new Error('B2B 거래처명을 입력해주세요.');
+  }
+  if (!name) throw new Error('이름을 입력해주세요.');
+  if (!phone) throw new Error('핸드폰 번호를 입력해주세요.');
+  if (!addr) throw new Error('주소를 입력해주세요.');
+
+  const items = kind === 'sample'
+    ? [{ qty: 12, flavor: 'mix', count: 1 }]
+    : (Array.isArray(payload.items) ? payload.items : []).map(item => ({
+        qty: Number(item?.qty),
+        flavor: item?.flavor,
+        count: Math.max(1, Number(item?.count || 1))
+      }));
+
+  if (!items.length) {
+    throw new Error('발주 구성을 하나 이상 추가해주세요.');
+  }
+
+  const allowedQty = [6, 12, 24, 36, 48, 96];
+
+  items.forEach(item => {
+    if (!allowedQty.includes(item.qty)) {
+      throw new Error('수량은 6 / 12 / 24 / 36 / 48 / 96 중에서 선택해주세요.');
+    }
+    if (!item.flavor) {
+      throw new Error('맛 구성을 선택해주세요.');
+    }
+    if (item.qty === 6 && item.flavor === 'mix') {
+      throw new Error('6캔은 사과+복숭아 혼합을 선택할 수 없습니다.');
+    }
+    if (kind === 'b2b') {
+      const validB2B =
+        (item.qty === 24 && ['apple', 'peach'].includes(item.flavor)) ||
+        (item.qty === 48 && ['apple', 'peach', 'mix'].includes(item.flavor));
+
+      if (!validB2B) {
+        throw new Error('B2B 제품은 사과 24캔 / 복숭아 24캔 / 사과 48캔 / 복숭아 48캔 / 사과 24캔 + 복숭아 24캔 중에서 선택해주세요.');
+      }
+    }
+  });
+
+  const at = new Date().toISOString();
+
+  const rows = items.map(item => ({
+    kind,
+    registered_at: at,
+    name,
+    phone,
+    addr,
+    qty: item.qty,
+    flavor: item.flavor,
+    company: kind === 'b2b' ? company : null,
+    item_count: item.count
+  }));
+
+  const { error } = await supabaseClient
+    .from('manual_orders')
+    .insert(rows);
+
+  if (error) throw new Error(error.message);
+
+  return { success: true, count: rows.length };
 }
 
 /* =========================
@@ -944,7 +1017,25 @@ function gasSaveAndSendRequestEmail(payload) {
    8. 올리브영 발주 이력
    ========================= */
 
-function gasSaveOliveUpload(payload) {
+/* 나인로지스 배송 양식 14개 칸 ↔ 표의 칸 이름 */
+const OLIVE_FIELD = {
+  '보내는분성명': 'sender_name',
+  '보내는분전화번호': 'sender_phone',
+  '보내는분주소(전체, 분할)': 'sender_addr',
+  '받는분성명': 'receiver_name',
+  '주문자성명': 'orderer_name',
+  '받는분전화번호': 'receiver_phone',
+  '받는분기타연락처': 'receiver_phone2',
+  '받는분우편번호': 'receiver_zip',
+  '받는분주소(전체, 분할)': 'receiver_addr',
+  '품목명': 'item_name',
+  '배송메세지1': 'delivery_msg',
+  '내품수량': 'item_qty',
+  '박스수량': 'box_qty',
+  '운송장번호': 'tracking_no'
+};
+
+async function gasSaveOliveUpload(payload) {
   if (IS_SAMPLE_MODE) {
     return Promise.reject(
       new Error(
@@ -953,21 +1044,122 @@ function gasSaveOliveUpload(payload) {
       )
     );
   }
-  return notConnected('올리브영 업로드 저장');
+
+  const fingerprint = String(payload?.fingerprint || '');
+  const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+
+  /* 같은 파일을 다시 올린 경우 기존 이력을 돌려줍니다 (중복 저장 방지) */
+  if (fingerprint) {
+    const { data: found } = await supabaseClient
+      .from('olive_uploads')
+      .select('*')
+      .eq('fingerprint', fingerprint)
+      .maybeSingle();
+
+    if (found) {
+      return { success: true, duplicate: true, history: { id: `olive::${found.id}` } };
+    }
+  }
+
+  let appleQty = 0, peachQty = 0, otherQty = 0;
+
+  rows.forEach(r => {
+    const item = String(r['품목명'] || '');
+    const qty = Number(r['내품수량']) || 0;
+
+    if (item.includes('사과')) appleQty += qty;
+    else if (item.includes('복숭아')) peachQty += qty;
+    else otherQty += qty;
+  });
+
+  const { data: upload, error: uploadError } = await supabaseClient
+    .from('olive_uploads')
+    .insert({
+      file_name: payload?.fileName || '',
+      fingerprint: fingerprint || null,
+      order_count: Number(payload?.orderCount) || 0,
+      row_count: rows.length,
+      apple_qty: appleQty,
+      peach_qty: peachQty,
+      other_qty: otherQty,
+      status: '미다운로드'
+    })
+    .select()
+    .single();
+
+  if (uploadError) throw new Error(uploadError.message);
+
+  const detailRows = rows.map((r, index) => {
+    const out = { upload_id: upload.id, row_no: index + 1 };
+
+    Object.keys(OLIVE_FIELD).forEach(label => {
+      const column = OLIVE_FIELD[label];
+      const value = r[label];
+
+      out[column] = (column === 'item_qty' || column === 'box_qty')
+        ? (value === '' || value == null ? null : Number(value))
+        : (value == null ? '' : String(value));
+    });
+
+    return out;
+  });
+
+  if (detailRows.length) {
+    const { error: rowError } = await supabaseClient
+      .from('olive_rows')
+      .insert(detailRows);
+
+    if (rowError) throw new Error(rowError.message);
+  }
+
+  return { success: true, duplicate: false, history: { id: `olive::${upload.id}` } };
 }
 
-function gasGetOliveHistoryRows(id) {
+async function gasGetOliveHistoryRows(id) {
   if (IS_SAMPLE_MODE) {
     return Promise.reject(
       new Error('샘플 모드에는 저장된 올리브영 발주 데이터가 없습니다.')
     );
   }
-  return notConnected('올리브영 이력 조회');
+
+  const uploadId = String(id || '').replace(/^olive::/, '');
+
+  const { data, error } = await supabaseClient
+    .from('olive_rows')
+    .select('*')
+    .eq('upload_id', uploadId)
+    .order('row_no', { ascending: true });
+
+  if (error) throw new Error(error.message);
+
+  /* 화면이 쓰던 형식(한글 칸 이름)으로 되돌려줍니다. */
+  return (data || []).map(r => {
+    const out = {};
+    Object.keys(OLIVE_FIELD).forEach(label => {
+      const value = r[OLIVE_FIELD[label]];
+      out[label] = value == null ? '' : value;
+    });
+    return out;
+  });
 }
 
-function gasMarkOliveDownloaded(id, fileName) {
+async function gasMarkOliveDownloaded(id, fileName) {
   if (IS_SAMPLE_MODE) {
     return sampleDelay({ success: true }, 80);
   }
-  return notConnected('올리브영 다운로드 기록');
+
+  const uploadId = String(id || '').replace(/^olive::/, '');
+
+  const { error } = await supabaseClient
+    .from('olive_uploads')
+    .update({
+      status: '다운로드 완료',
+      downloaded_at: new Date().toISOString(),
+      download_file_name: fileName || ''
+    })
+    .eq('id', uploadId);
+
+  if (error) throw new Error(error.message);
+
+  return { success: true };
 }
