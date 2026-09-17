@@ -764,7 +764,9 @@ async function upsertOverride(id, patch) {
 
   if (error) throw new Error(error.message);
 
-  return { success: true };
+  /* 기존 어드민처럼 갱신된 전체 데이터를 함께 돌려줍니다.
+     화면이 다시 조회하지 않아도 되므로 저장이 한 박자 빨라집니다. */
+  return { success: true, data: await fetchAdminData() };
 }
 
 async function gasHold(id, hold) {
@@ -811,7 +813,7 @@ async function gasCancel(ids) {
     });
   }
 
-  return { success: true };
+  return { success: true, data: await fetchAdminData() };
 }
 
 async function gasComplete(ids) {
@@ -842,7 +844,7 @@ async function gasComplete(ids) {
     });
   }
 
-  return { success: true };
+  return { success: true, data: await fetchAdminData() };
 }
 
 /* =========================
@@ -931,7 +933,7 @@ async function gasCreateManualOrder(payload) {
 
   if (error) throw new Error(error.message);
 
-  return { success: true, count: rows.length };
+  return { success: true, count: rows.length, data: await fetchAdminData() };
 }
 
 /* =========================

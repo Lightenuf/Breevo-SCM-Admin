@@ -6922,6 +6922,10 @@ async function saveMemo() {
       await gasGet()
     );
 
+    // 저장하면 상세 창을 닫고 목록으로 돌아갑니다.
+    state.drawer = null;
+    state.editing = false;
+
     render();
 
     toast(
