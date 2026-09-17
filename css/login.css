@@ -1,0 +1,162 @@
+/* =========================
+   로그인 화면
+   기존 어드민 디자인(admin.css)의 색과 글꼴을 그대로 씁니다.
+   ========================= */
+
+.login-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #fff;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 340px;
+}
+
+.login-brand {
+  margin-bottom: 30px;
+}
+
+.login-brand-name {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -.035em;
+}
+
+.login-brand-sub {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  color: var(--m1);
+  margin-top: 2px;
+}
+
+.login-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  margin-bottom: 6px;
+}
+
+.login-desc {
+  font-size: 12.5px;
+  color: var(--m2);
+  margin-bottom: 24px;
+}
+
+.login-field {
+  margin-bottom: 12px;
+}
+
+.login-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--m1);
+  margin-bottom: 6px;
+}
+
+.login-input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 13.5px;
+  color: var(--ink);
+  transition: border-color .16s;
+}
+
+.login-input::placeholder {
+  color: #C4B9B5;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  cursor: pointer;
+  transition: opacity .16s;
+}
+
+.login-btn:hover {
+  opacity: .88;
+}
+
+.login-btn:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.login-error {
+  margin-top: 14px;
+  padding: 10px 13px;
+  border-radius: 9px;
+  background: var(--accent-soft);
+  color: #9E2431;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.login-note {
+  margin-top: 20px;
+  font-size: 11px;
+  color: var(--m1);
+  line-height: 1.6;
+}
+
+/* 상단 바에 들어갈 로그아웃 영역 */
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 10px;
+  margin-left: 4px;
+  border-left: 1px solid var(--line);
+}
+
+.user-email {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--m2);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  padding: 6px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--m2);
+  cursor: pointer;
+  transition: background .16s, color .16s;
+}
+
+.logout-btn:hover {
+  background: var(--soft);
+  color: var(--ink);
+}

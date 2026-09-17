@@ -4,13 +4,14 @@
    ========================= */
 
 const BREEVO_CONFIG = {
-  // Supabase 대시보드 → Settings → API 에서 복사해서 넣어주세요.
-  SUPABASE_URL: '',
-  SUPABASE_ANON_KEY: '',
+  // Supabase 대시보드 → Project Settings → API Keys 에서 확인할 수 있습니다.
+  // 이 두 값은 브라우저에 공개되는 값입니다. 실제 데이터 보호는 RLS(행 단위 접근 제어)가 담당합니다.
+  SUPABASE_URL: 'https://bsgxbwoqjjrlkquhgity.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_oEd0VQw0ncyk2BF5BmFFBw_8cz5UXGF',
 
-  // 위 두 값이 비어 있으면 자동으로 샘플 데이터로 실행됩니다.
-  // 실제 연결 후에도 강제로 샘플을 보고 싶으면 true 로 바꾸세요.
-  FORCE_SAMPLE_MODE: false
+  // 아직 데이터베이스 테이블을 만들기 전이라 샘플 데이터로 실행합니다.
+  // 테이블 생성과 데이터 이전이 끝나면 false 로 바꿔서 실제 데이터에 연결합니다.
+  FORCE_SAMPLE_MODE: true
 };
 
 const IS_SAMPLE_MODE =

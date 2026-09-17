@@ -11,7 +11,9 @@
   >
 
   <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/login.css">
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-populate@1.21.0/browser/xlsx-populate.min.js"></script>
@@ -37,8 +39,8 @@
 <!-- 데이터 연결부 (기존 Apps Script 호출을 대체) -->
 <script src="js/data.js"></script>
 
-<!-- 목록·상세 화면, XLSX 생성, 클릭 동작 -->
-<script src="js/views.js"></script>
+<!-- 로그인. 로그인에 성공하면 js/views.js 를 불러와 어드민 화면을 띄웁니다. -->
+<script src="js/auth.js"></script>
 
 </body>
 </html>
