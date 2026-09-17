@@ -171,6 +171,32 @@ function flavorLabelOf(flavor) {
   return '';
 }
 
+/* 전화번호에 하이픈을 넣습니다 (기존 formatPhone_ 와 동일) */
+function formatPhone(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+
+  if (digits.length === 11) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  }
+
+  if (digits.length === 10) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+
+  return String(value || '').trim();
+}
+
+/* B2B 제품 표기 (기존 b2bProductLabel_ 와 동일) */
+function b2bProductLabel(qty, flavor) {
+  const n = Number(qty) || 0;
+
+  if (n === 48 && flavor === 'mix') return '사과 24캔 + 복숭아 24캔';
+  if ((n === 24 || n === 48) && flavor === 'apple') return `사과 ${n}캔`;
+  if ((n === 24 || n === 48) && flavor === 'peach') return `복숭아 ${n}캔`;
+
+  return '';
+}
+
 /* 화면과 어드민 관리(order_overrides)를 잇는 기존 관리ID 형식 그대로 */
 function legacyId(kind, row) {
   return row.source === 'manual'
@@ -209,7 +235,7 @@ function applyOverride(base, ov) {
 
   if (ov.edit_insta)      out.insta = ov.edit_insta;
   if (ov.edit_name)       out.name = ov.edit_name;
-  if (ov.edit_phone)      out.phone = ov.edit_phone;
+  if (ov.edit_phone)      out.phone = formatPhone(ov.edit_phone);
   if (ov.edit_addr)       out.addr = ov.edit_addr;
   if (ov.edit_event_date) out.eventDate = ov.edit_event_date;
   if (ov.edit_qty)        out.qty = Number(ov.edit_qty);
@@ -277,11 +303,17 @@ function groupB2B(orders) {
   const map = {};
 
   orders.forEach(order => {
-    const key = String(order.company || '').trim();
+    /* 거래처를 구분하는 이름. 화면에서 펼치기/접기의 기준이 됩니다. */
+    const key = String(order.company || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+
     if (!key) return;
 
     if (!map[key]) {
       map[key] = {
+        key,
         company: order.company,
         branch: order.branch || '',
         name: order.name,
@@ -349,7 +381,7 @@ async function fetchAdminData() {
       id, kind: 'sponsor', kindLabel: '협찬',
       source: r.source, sourceSheet: r.source_sheet, sourceRow: r.source_row,
       timestamp: r.timestamp_raw, receivedDate: r.received_date,
-      insta: r.insta || '', name: r.name || '', phone: r.phone || '',
+      insta: r.insta || '', name: r.name || '', phone: formatPhone(r.phone),
       addr: r.addr || '', eventDate: r.event_date,
       qty: r.qty, flavor: r.flavor,
       memo: '', sheetAt: '', doneAt: '', hold: false
@@ -381,7 +413,7 @@ async function fetchAdminData() {
         source: r.source, sourceSheet: r.source_sheet, sourceRow: r.source_row,
         timestamp: r.timestamp_raw, receivedDate: r.received_date,
         eventTitle: r.event_title || '',
-        insta: r.insta || '', name: r.name || '', phone: r.phone || '',
+        insta: r.insta || '', name: r.name || '', phone: formatPhone(r.phone),
         addr: r.addr || '', qty: r.qty, flavor: r.flavor,
         memo: '', sheetAt: '', doneAt: '', hold: false
       };
@@ -419,7 +451,7 @@ async function fetchAdminData() {
       receivedDate: r.received_date,
       receivedAt: stampText(r.received_at) || r.timestamp_raw,
       company: r.company || '', branch: r.branch || '',
-      insta: '', name: r.name || '', phone: r.phone || '', addr: r.addr || '',
+      insta: '', name: r.name || '', phone: formatPhone(r.phone), addr: r.addr || '',
       qty: r.qty, flavor: r.flavor, b2bProduct: r.b2b_product || '',
       memo: '', sheetAt: '', doneAt: '', hold: false
     };
@@ -461,11 +493,11 @@ async function fetchAdminData() {
       timestamp: stampText(r.registered_at),
       receivedDate,
       receivedAt: stampText(r.registered_at),
-      insta: '', name: r.name || '', phone: r.phone || '', addr: r.addr || '',
+      insta: '', name: r.name || '', phone: formatPhone(r.phone), addr: r.addr || '',
       qty: r.qty, flavor: r.flavor,
       company: r.company || '', branch: r.company ? '수동 등록' : '',
       itemCount: r.item_count || 1,
-      b2bProduct: r.qty ? `${r.qty}캔 (${flavorLabelOf(r.flavor)})` : '',
+      b2bProduct: b2bProductLabel(r.qty, r.flavor),
       eventDate: null,
       memo: '', sheetAt: '', doneAt: '', hold: false
     };
