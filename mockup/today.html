@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breevo 발주 어드민 — 디자인 시안</title>
+
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+>
+
+<style>
+:root {
+  --ink: #17130F;
+  --g1: #A9A29E;
+  --g2: #79716D;
+  --g3: #4A4340;
+  --line: rgba(23,19,15,.08);
+  --line-soft: rgba(23,19,15,.05);
+  --hover: #FAF9F8;
+  --side-bg: #FCFBFA;
+
+  --brand: #E1414C;        /* 브리보 레드 — 로고와 뱃지에만 */
+  --urgent: #C4303A;
+  --urgent-soft: #FBECEC;
+
+  --side-w: 236px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--ink);
+  font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum";
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--side-w) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* ══ 사이드바 ══════════════════════ */
+
+.side {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 16px 20px;
+  background: var(--side-bg);
+  border-right: 1px solid var(--line);
+}
+
+.side-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 10px 26px;
+}
+
+.brand-mark {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--brand);
+  flex: 0 0 auto;
+}
+
+.brand-text .name {
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  line-height: 1.15;
+}
+
+.brand-text .sub {
+  margin-top: 2px;
+  font-size: 9.5px;
+  font-weight: 300;
+  letter-spacing: .16em;
+  color: var(--g1);
+}
+
+.side-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.side-group-label {
+  padding: 0 10px 7px;
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: .16em;
+  color: var(--g1);
+}
+
+.side-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: .01em;
+  color: var(--g2);
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.side-item:hover {
+  background: rgba(23,19,15,.035);
+  color: var(--g3);
+}
+
+.side-item.active {
+  background: #fff;
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(23,19,15,.05);
+}
+
+.side-item .label { flex: 1; }
+
+.side-item .count {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--g1);
+}
+
+.side-item .count.hot {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.side-icon {
+  width: 15px;
+  display: grid;
+  place-items: center;
+  color: currentColor;
+  opacity: .62;
+}
+
+.side-item.active .side-icon { opacity: 1; }
+
+.side-bottom {
+  padding-top: 16px;
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.btn-compose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 11px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--ink);
+  color: #fff;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: .01em;
+  cursor: pointer;
+  transition: background .16s;
+}
+
+.btn-compose:hover { background: #000; }
+
+.side-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: .02em;
+  color: var(--g1);
+}
+
+.user-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(23,19,15,.07);
+  display: grid;
+  place-items: center;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--g2);
+  letter-spacing: 0;
+}
+
+/* ══ 본문 ═════════════════════════ */
+
+.main {
+  min-width: 0;
+  padding: 0 46px 130px;
+}
+
+.main-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 22px 0 0;
+  color: var(--g1);
+}
+
+.main-top .stamp {
+  margin-right: auto;
+  font-size: 10.5px;
+  font-weight: 300;
+  letter-spacing: .1em;
+}
+
+.main-top svg { display: block; cursor: pointer; }
+.main-top svg:hover { color: var(--g3); }
+
+.page-head { padding: 40px 0 0; }
+
+.page-title {
+  font-size: 29px;
+  font-weight: 600;
+  letter-spacing: -.025em;
+  margin: 0 0 16px;
+}
+
+.state-line {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  font-size: 12.5px;
+}
+
+.state-main { font-weight: 500; color: var(--g3); }
+.state-main b { font-weight: 600; color: var(--ink); }
+.state-urgent { font-weight: 600; color: var(--urgent); }
+.state-done { font-weight: 300; color: var(--g1); }
+
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 40px 0 0;
+}
+
+.select-info {
+  font-size: 11.5px;
+  font-weight: 300;
+  letter-spacing: .06em;
+  color: var(--g1);
+}
+
+.select-info b { font-weight: 600; color: var(--ink); letter-spacing: 0; }
+
+.btn-download {
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-download:disabled {
+  background: transparent;
+  color: var(--g1);
+  border: 1px solid var(--line);
+  cursor: default;
+}
+
+/* ── 그룹 ─────────────────────── */
+
+.group { margin-top: 42px; }
+
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 4px;
+}
+
+.group-label {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  color: var(--g2);
+}
+
+.group.urgent .group-label { color: var(--urgent); }
+
+.group-count {
+  font-size: 10.5px;
+  font-weight: 300;
+  letter-spacing: .06em;
+  color: var(--g1);
+}
+
+.group-rule { flex: 1; height: 1px; background: var(--line); }
+
+.col-head,
+.row {
+  display: grid;
+  grid-template-columns:
+    22px 74px minmax(0,1.25fr) minmax(0,.7fr)
+    minmax(0,.85fr) 60px minmax(0,1fr) 88px 16px;
+  gap: 14px;
+  align-items: center;
+}
+
+.col-head {
+  padding: 13px 0 11px;
+  font-size: 9.5px;
+  font-weight: 300;
+  letter-spacing: .14em;
+  color: var(--g1);
+}
+
+.row {
+  padding: 18px 14px;
+  margin: 0 -14px;
+  border-top: 1px solid var(--line-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .14s;
+}
+
+.row:hover { background: var(--hover); }
+.row:hover .chevron { opacity: 1; }
+
+.check {
+  width: 15px; height: 15px;
+  border: 1px solid rgba(23,19,15,.18);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 9px;
+  transition: background .14s, border-color .14s;
+}
+
+.check.on { background: var(--ink); border-color: var(--ink); }
+
+/* 구분 뱃지 — 기존 어드민의 채널 색 그대로 */
+.kind {
+  justify-self: start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+
+.kind-sponsor { color: #2F5E91; background: #EAF3FC; }
+.kind-resend  { color: #9E2431; background: #FDECEC; }
+.kind-olive   { color: #66804F; background: #EEF3E8; }
+.kind-amb     { color: #765C9D; background: #F1ECF7; }
+.kind-event   { color: var(--g2); background: #F7F3F1; }
+.kind-sample  { color: #7A5A00; background: #FFF4BF; }
+.kind-b2b     { color: #315C53; background: #E9F3EF; }
+
+.who {
+  font-size: 13.5px; font-weight: 600; letter-spacing: -.01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.recipient { font-size: 12.5px; font-weight: 500; color: var(--g3); }
+.phone { font-size: 12px; font-weight: 300; color: var(--g1); }
+.qty { font-size: 13px; font-weight: 600; letter-spacing: -.02em; }
+
+.compose {
+  font-size: 12px; font-weight: 400; color: var(--g2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.chip {
+  justify-self: start;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  background: #F5F3F2;
+  color: var(--g2);
+}
+
+.chip.over { background: var(--urgent-soft); color: var(--urgent); font-weight: 600; }
+
+.chevron {
+  opacity: 0; color: var(--g1); font-size: 13px;
+  transition: opacity .14s; justify-self: end;
+}
+
+.done-section {
+  margin-top: 74px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+
+.done-head { display: flex; align-items: baseline; gap: 10px; }
+
+.done-label {
+  font-size: 10.5px; font-weight: 300;
+  letter-spacing: .14em; color: var(--g1);
+}
+
+.done-row {
+  display: grid;
+  grid-template-columns: 148px 74px minmax(0,1.2fr) minmax(0,.8fr) 60px minmax(0,1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 14px 0;
+  border-top: 1px solid var(--line-soft);
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--g1);
+}
+
+.done-row .done-who { font-weight: 500; color: var(--g2); }
+
+.mock-tag {
+  position: fixed; right: 18px; bottom: 18px; z-index: 50;
+  padding: 7px 13px; border-radius: 999px;
+  background: var(--ink); color: #fff;
+  font-size: 10.5px; font-weight: 500; letter-spacing: .1em; opacity: .8;
+}
+
+@media (max-width: 1240px) {
+  .main { padding: 0 26px 100px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="shell">
+
+  <!-- ══ 사이드바 ══ -->
+  <aside class="side">
+    <div class="side-brand">
+      <div class="brand-mark"></div>
+      <div class="brand-text">
+        <div class="name">Breevo</div>
+        <div class="sub">발주 어드민</div>
+      </div>
+    </div>
+
+    <div class="side-scroll">
+      <div>
+        <button class="side-item active">
+          <span class="side-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.8V20h13V9.8"></path></svg>
+          </span>
+          <span class="label">오늘 발주</span>
+          <span class="count hot" id="cntToday"></span>
+        </button>
+      </div>
+
+      <div>
+        <div class="side-group-label">채널</div>
+        <button class="side-item"><span class="side-icon">◍</span><span class="label">협찬</span><span class="count hot" id="cntSponsor"></span></button>
+        <button class="side-item"><span class="side-icon">◍</span><span class="label">올리브영</span><span class="count"></span></button>
+        <button class="side-item"><span class="side-icon">◍</span><span class="label">엠베서더</span><span class="count" id="cntAmb"></span></button>
+        <button class="side-item"><span class="side-icon">◍</span><span class="label">이벤트</span><span class="count" id="cntEvent"></span></button>
+        <button class="side-item"><span class="side-icon">◍</span><span class="label">샘플</span><span class="count" id="cntSample"></span></button>
+        <button class="side-item"><span class="side-icon">◍</span><span class="label">B2B</span><span class="count hot" id="cntB2b"></span></button>
+      </div>
+
+      <div>
+        <div class="side-group-label">도구</div>
+        <button class="side-item">
+          <span class="side-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"></rect><path d="M8 3v3M16 3v3M3 10h18"></path></svg>
+          </span>
+          <span class="label">발주 달력</span>
+        </button>
+        <button class="side-item">
+          <span class="side-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.6"></circle><path d="M12 3.6v2M12 18.4v2M3.6 12h2M18.4 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18"></path></svg>
+          </span>
+          <span class="label">설정</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="side-bottom">
+      <button class="btn-compose">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+        작성하기
+      </button>
+
+      <div class="side-user">
+        <div class="user-dot">어</div>
+        <span>어수민</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ 본문 ══ -->
+  <main class="main">
+
+    <div class="main-top">
+      <div class="stamp" id="stamp"></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.5a6 6 0 0 0-12 0c0 6.5-2.6 7.5-2.6 7.5h17.2S18 15 18 8.5"></path><path d="M13.7 20a2 2 0 0 1-3.4 0"></path></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v6h-6"></path></svg>
+    </div>
+
+    <div class="page-head">
+      <h1 class="page-title">오늘 발주</h1>
+      <div class="state-line" id="stateLine"></div>
+    </div>
+
+    <div class="action-bar">
+      <div class="select-info" id="selectInfo">발주서를 만들 건을 선택해주세요</div>
+      <button class="btn-download" id="btnDownload" disabled>수동발주서 다운로드</button>
+    </div>
+
+    <div id="groups"></div>
+
+    <div class="done-section">
+      <div class="done-head">
+        <span class="done-label">발주 완료</span>
+        <span class="group-count" id="doneCount"></span>
+      </div>
+      <div id="doneRows"></div>
+    </div>
+
+  </main>
+</div>
+
+<div class="mock-tag">디자인 시안</div>
+
+<script src="../js/sample-data.js"></script>
+<script>
+const data = buildSampleAdminData();
+
+const esc = v => String(v ?? '').replace(/[&<>"']/g, m => ({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[m]));
+
+const flavorText = o =>
+  o.flavor === 'mix'
+    ? `사과 ${o.appleQty} · 복숭아 ${o.peachQty}`
+    : (o.flavorLabel || '—');
+
+const displayName = o =>
+  (o.kindLabel === '이벤트' || o.kindLabel === '오배송건 재발송')
+    ? (o.eventTitle || o.insta || o.name || '—')
+    : o.kindLabel === 'B2B'
+      ? (o.company || o.name || '—')
+      : (o.insta || o.name || '—');
+
+const pending = [
+  ...data.sponsor.filter(o => ['오늘 발주','발주 지연'].includes(o.status)),
+  ...data.ambassador.filter(o => o.status === '출고 대기'),
+  ...data.event.filter(o => o.status === '출고 대기'),
+  ...data.sample.filter(o => o.status === '출고 대기'),
+  ...data.b2b.filter(o => ['오늘 발주','발주 지연'].includes(o.status))
+];
+
+const doneToday = [
+  ...data.sponsor.filter(o => o.status === '발주 완료'),
+  ...data.ambassador.filter(o => o.status === '출고 완료'),
+  ...data.event.filter(o => o.status === '출고 완료'),
+  ...data.sample.filter(o => o.status === '출고 완료'),
+  ...data.b2b.filter(o => o.status === '출고 완료')
+].sort((a,b) => String(b.doneAt||'').localeCompare(String(a.doneAt||'')));
+
+/* 급한 순서로만 정렬하고 목록은 하나로 유지합니다 (기존 어드민과 동일) */
+const STATUS_RANK = { '발주 지연': 1, '오늘 발주': 2, '출고 대기': 3 };
+
+const KIND_CLASS = {
+  '협찬': 'kind-sponsor',
+  '오배송건 재발송': 'kind-resend',
+  '올리브영': 'kind-olive',
+  '엠베서더': 'kind-amb',
+  '샘플': 'kind-sample',
+  'B2B': 'kind-b2b'
+};
+
+const kindClass = k => KIND_CLASS[k] || 'kind-event';
+
+pending.sort((a, b) =>
+  (STATUS_RANK[a.status] || 9) - (STATUS_RANK[b.status] || 9)
+);
+
+const selected = new Set();
+const selectable = pending.filter(o => !o.infoMissing);
+const allSelected = () =>
+  selectable.length > 0 && selectable.every(o => selected.has(o.id));
+
+function rowHtml(o) {
+  const over = o.status === '발주 지연';
+  return `
+    <div class="row" data-id="${esc(o.id)}">
+      <button class="check ${selected.has(o.id)?'on':''}" data-check="${esc(o.id)}">${selected.has(o.id)?'✓':''}</button>
+      <div class="kind ${kindClass(o.kindLabel)}">${esc(o.kindLabel)}</div>
+      <div class="who">${esc(displayName(o))}</div>
+      <div class="recipient">${esc(o.name || '—')}</div>
+      <div class="phone">${esc(o.phone || '—')}</div>
+      <div class="qty">${o.qty ? o.qty + '캔' : '—'}</div>
+      <div class="compose">${esc(o.b2bProduct || flavorText(o))}</div>
+      <div class="chip ${over?'over':''}">${esc(o.status)}</div>
+      <div class="chevron">›</div>
+    </div>`;
+}
+
+function render() {
+  const overdue = pending.filter(o => o.status === '발주 지연').length;
+
+  const t = data.today.split('-');
+  document.getElementById('stamp').textContent =
+    `${t[0]}. ${Number(t[1])}. ${Number(t[2])} 기준`;
+
+  document.getElementById('stateLine').innerHTML = `
+    <span class="state-main">처리할 발주 <b>${pending.length}건</b></span>
+    ${overdue ? `<span class="state-urgent">지연 ${overdue}건</span>` : ''}
+    <span class="state-done">완료 ${doneToday.length}건</span>`;
+
+  document.getElementById('cntToday').textContent = pending.length || '';
+  document.getElementById('cntSponsor').textContent =
+    (data.summary.sponsorToday + data.summary.sponsorOverdue) || '';
+  document.getElementById('cntAmb').textContent = data.summary.ambassadorWaiting || '';
+  document.getElementById('cntEvent').textContent = data.summary.eventWaiting || '';
+  document.getElementById('cntSample').textContent = data.summary.sampleWaiting || '';
+  document.getElementById('cntB2b').textContent =
+    (data.summary.b2bToday + data.summary.b2bOverdue) || '';
+
+  document.getElementById('groups').innerHTML = `
+    <div class="group">
+      <div class="col-head">
+        <button class="check ${allSelected()?'on':''}" data-check-all>${allSelected()?'✓':''}</button>
+        <div>구분</div><div>업체·인플루언서</div><div>수령인</div>
+        <div>연락처</div><div>수량</div><div>구성</div><div>상태</div><div></div>
+      </div>
+      ${pending.map(rowHtml).join('')}
+    </div>`;
+
+  const n = selected.size;
+  const btn = document.getElementById('btnDownload');
+  btn.disabled = !n;
+  btn.textContent = n ? `수동발주서 다운로드 (${n})` : '수동발주서 다운로드';
+  document.getElementById('selectInfo').innerHTML = n
+    ? `<b>${n}건</b> 선택됨 · 다운로드하면 자동으로 완료 처리됩니다`
+    : '발주서를 만들 건을 선택해주세요';
+
+  document.getElementById('doneCount').textContent = `${doneToday.length}건`;
+  document.getElementById('doneRows').innerHTML = doneToday.map(o => `
+    <div class="done-row">
+      <div>${esc(o.doneAt || '—')}</div>
+      <div>${esc(o.kindLabel)}</div>
+      <div class="done-who">${esc(displayName(o))}</div>
+      <div>${esc(o.name || '—')}</div>
+      <div>${o.qty ? o.qty + '캔' : '—'}</div>
+      <div>${esc(o.b2bProduct || flavorText(o))}</div>
+    </div>`).join('');
+}
+
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-check-all]')) {
+    e.stopPropagation();
+    if (allSelected()) {
+      selected.clear();
+    } else {
+      selectable.forEach(o => selected.add(o.id));
+    }
+    render();
+    return;
+  }
+
+  const check = e.target.closest('[data-check]');
+  if (check) {
+    e.stopPropagation();
+    const id = check.getAttribute('data-check');
+    selected.has(id) ? selected.delete(id) : selected.add(id);
+    render();
+    return;
+  }
+  const row = e.target.closest('.row');
+  if (row) {
+    const id = row.dataset.id;
+    selected.has(id) ? selected.delete(id) : selected.add(id);
+    render();
+  }
+});
+
+render();
+</script>
+
+</body>
+</html>
