@@ -512,7 +512,9 @@ async function fetchAdminData() {
     o.peachQty = s.peach;
 
     if (kind === 'sponsor') {
-      o.dueDate = o.eventDate ? addDaysIsoLocal(o.eventDate, -leadDays) : receivedDate;
+      /* 기존 어드민과 동일: 수동 등록 협찬은 행사일이 없으므로 발주 예정일을 오늘로 둡니다. */
+      o.eventDate = o.eventDate || '';
+      o.dueDate = o.eventDate ? addDaysIsoLocal(o.eventDate, -leadDays) : today;
       o.status = o.infoMissing ? '정보 확인 필요'
         : o.hold ? '보류'
         : o.doneAt ? '발주 완료'
