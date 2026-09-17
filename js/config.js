@@ -9,9 +9,8 @@ const BREEVO_CONFIG = {
   SUPABASE_URL: 'https://bsgxbwoqjjrlkquhgity.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_oEd0VQw0ncyk2BF5BmFFBw_8cz5UXGF',
 
-  // 아직 데이터베이스 테이블을 만들기 전이라 샘플 데이터로 실행합니다.
-  // 테이블 생성과 데이터 이전이 끝나면 false 로 바꿔서 실제 데이터에 연결합니다.
-  FORCE_SAMPLE_MODE: true
+  // true 로 바꾸면 Supabase 대신 샘플 데이터로 화면을 확인할 수 있습니다.
+  FORCE_SAMPLE_MODE: false
 };
 
 const IS_SAMPLE_MODE =
