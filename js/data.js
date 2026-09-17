@@ -671,21 +671,13 @@ async function gasUpdate(id, patch) {
       return Promise.reject(new Error('주문을 찾지 못했습니다.'));
     }
 
-    const map = {
-      '상태': 'status',
-      '이벤트명': 'eventTitle',
-      '수정 인스타그램': 'insta',
-      '수정 수령인': 'name',
-      '수정 연락처': 'phone',
-      '수정 주소': 'addr',
-      '수정 행사 날짜': 'eventDate',
-      '수정 수량': 'qty',
-      '수정 맛 구성': 'flavor',
-      '내부 메모': 'memo'
-    };
+    const editable = [
+      'status', 'eventTitle', 'insta', 'name', 'phone',
+      'addr', 'eventDate', 'qty', 'flavor', 'memo'
+    ];
 
     Object.keys(patch || {}).forEach(key => {
-      const field = map[key];
+      const field = editable.includes(key) ? key : null;
       if (!field) return;
 
       const value = patch[key];
@@ -710,20 +702,24 @@ async function gasUpdate(id, patch) {
 /* 어드민 관리(order_overrides)에 수정 내용을 기록합니다.
    기존 시트의 열 이름을 그대로 받아서 표의 칸으로 옮깁니다. */
 async function upsertOverride(id, patch) {
+  if (!id) throw new Error('관리ID가 없습니다.');
+
+  /* 화면이 보내는 이름(영문) → 표의 칸 이름.
+     기존 updateOrder 가 받던 이름을 그대로 따릅니다. */
   const COLUMN = {
-    '상태': 'status',
-    '이벤트명': 'event_title',
-    '수정 인스타그램': 'edit_insta',
-    '수정 수령인': 'edit_name',
-    '수정 연락처': 'edit_phone',
-    '수정 주소': 'edit_addr',
-    '수정 행사 날짜': 'edit_event_date',
-    '수정 수량': 'edit_qty',
-    '수정 맛 구성': 'edit_flavor',
-    '내부 메모': 'memo',
-    '보류': 'hold',
-    '발주서 생성일': 'sheet_created_at',
-    '완료일': 'done_at'
+    status: 'status',
+    eventTitle: 'event_title',
+    insta: 'edit_insta',
+    name: 'edit_name',
+    phone: 'edit_phone',
+    addr: 'edit_addr',
+    eventDate: 'edit_event_date',
+    qty: 'edit_qty',
+    flavor: 'edit_flavor',
+    memo: 'memo',
+    hold: 'hold',
+    sheetCreatedAt: 'sheet_created_at',
+    doneAt: 'done_at'
   };
 
   const KIND_LABEL = {
@@ -756,6 +752,9 @@ async function upsertOverride(id, patch) {
 
     if (column === 'edit_qty') value = Number(value);
 
+    /* 맛 구성은 기존 어드민과 동일하게 한글 표기로 저장합니다. */
+    if (column === 'edit_flavor') value = flavorLabelOf(value) || value;
+
     row[column] = value;
   });
 
@@ -785,8 +784,8 @@ async function gasHold(id, hold) {
   }
 
   return upsertOverride(id, {
-    '보류': hold ? 'TRUE' : 'FALSE',
-    '상태': hold ? '보류' : ''
+    hold: !!hold,
+    status: hold ? '보류' : ''
   });
 }
 
@@ -806,9 +805,9 @@ async function gasCancel(ids) {
 
   for (const id of (ids || [])) {
     await upsertOverride(id, {
-      '상태': '',
-      '완료일': '',
-      '발주서 생성일': ''
+      status: '',
+      doneAt: '',
+      sheetCreatedAt: ''
     });
   }
 
@@ -837,9 +836,9 @@ async function gasComplete(ids) {
     const kind = String(id).split('::')[0];
 
     await upsertOverride(id, {
-      '상태': kind === 'sponsor' ? '발주 완료' : '출고 완료',
-      '발주서 생성일': stamp,
-      '완료일': stamp
+      status: kind === 'sponsor' ? '발주 완료' : '출고 완료',
+      sheetCreatedAt: stamp,
+      doneAt: stamp
     });
   }
 
