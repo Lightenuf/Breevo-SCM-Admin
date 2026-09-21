@@ -338,6 +338,35 @@ function groupB2B(orders) {
 }
 
 /* =========================
+   출고 거래처 목록
+   담당자 연락처가 포함되어 코드가 아닌 Supabase에 보관합니다.
+   로그인 직후 한 번 불러와 SHIPMENT_REQUEST_RECIPIENTS 를 채웁니다.
+   ========================= */
+
+async function loadShipmentRecipients() {
+  if (IS_SAMPLE_MODE) return;
+
+  const { data, error } = await supabaseClient
+    .from('shipment_recipients')
+    .select('*')
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('거래처 목록을 불러오지 못했습니다:', error.message);
+    return;
+  }
+
+  SHIPMENT_REQUEST_RECIPIENTS = (data || []).map(r => ({
+    key: r.key,
+    company: r.company || r.label || '',
+    address: r.addr || '',
+    phone: r.phone || '',
+    transportOther: r.transport_other || ''
+  }));
+}
+
+/* =========================
    1. 주문 데이터 조회
    ========================= */
 

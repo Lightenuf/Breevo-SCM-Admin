@@ -123,11 +123,14 @@ async function signOutAdmin() {
    한 번만 불러오도록 표시를 남깁니다. */
 let adminStarted = false;
 
-function startAdmin() {
+async function startAdmin() {
   if (adminStarted) return;
   adminStarted = true;
 
   document.getElementById('app').innerHTML = '';
+
+  /* 출고 거래처 목록을 먼저 채운 뒤 어드민 화면을 띄웁니다. */
+  await loadShipmentRecipients();
 
   const script = document.createElement('script');
   script.src = 'js/views.js';
