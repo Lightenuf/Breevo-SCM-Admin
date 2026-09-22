@@ -1272,3 +1272,51 @@ async function gasMarkOliveDownloaded(id, fileName) {
 
   return { success: true };
 }
+
+/* =========================
+   9. 실시간 갱신
+
+   자동 동기화(1분마다)가 새 신청을 넣으면,
+   Supabase 가 열려 있는 화면에 바로 알려줍니다.
+   새로고침하지 않아도 목록에 나타납니다.
+   ========================= */
+
+const REALTIME_TABLES = [
+  'sponsor_orders',
+  'ambassador_orders',
+  'event_orders',
+  'sample_orders',
+  'b2b_orders',
+  'manual_orders',
+  'order_overrides',
+  'olive_uploads'
+];
+
+let realtimeChannel = null;
+let realtimeTimer = null;
+
+function startRealtime() {
+  if (IS_SAMPLE_MODE || realtimeChannel) return;
+
+  const channel = supabaseClient.channel('breevo-admin');
+
+  /* 동기화 한 번에 수십 줄이 한꺼번에 바뀝니다.
+     그때마다 다시 그리면 화면이 깜빡이므로, 잠잠해지면 한 번만 갱신합니다. */
+  const bump = () => {
+    clearTimeout(realtimeTimer);
+    realtimeTimer = setTimeout(() => {
+      if (typeof refreshQuietly === 'function') refreshQuietly();
+    }, 1500);
+  };
+
+  REALTIME_TABLES.forEach(table => {
+    channel.on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table },
+      bump
+    );
+  });
+
+  channel.subscribe();
+  realtimeChannel = channel;
+}

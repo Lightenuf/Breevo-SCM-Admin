@@ -133,7 +133,12 @@ async function startAdmin() {
   await loadShipmentRecipients();
 
   const script = document.createElement('script');
-  script.src = 'js/views.js?v=202609221523';
+  script.src = 'js/views.js?v=202609221717';
+
+  /* 화면이 다 뜬 뒤에 실시간 갱신을 켭니다.
+     자동 동기화로 새 신청이 들어오면 새로고침 없이 목록에 나타납니다. */
+  script.onload = () => startRealtime();
+
   document.body.appendChild(script);
 }
 

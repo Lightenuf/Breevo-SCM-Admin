@@ -80,6 +80,37 @@ function setAdminData(data) {
    데이터 로딩
    ========================= */
 
+/* 화면을 건드리지 않고 데이터만 새로 가져옵니다.
+   자동 동기화로 새 신청이 들어왔을 때 쓰입니다.
+   작업 중일 때는 건너뜁니다. 입력하던 내용이 사라지면 안 되니까요. */
+async function refreshQuietly() {
+  const busy =
+    state.editing ||
+    state.manualOpen ||
+    state.shipmentRequestOpen ||
+    state.requestPreviewOpen ||
+    state.requestEmailOpen ||
+    document.querySelector('.loading');
+
+  if (busy) return;
+
+  try {
+    const data = await gasGet();
+    const picked = new Set(state.selected);
+
+    setAdminData(data);
+
+    /* 체크해둔 항목은 그대로 유지합니다. */
+    state.selected = picked;
+
+    render();
+
+  } catch (e) {
+    /* 실패해도 화면은 그대로 둡니다. 다음 갱신 때 다시 시도합니다. */
+    console.warn('자동 갱신 실패:', e.message);
+  }
+}
+
 async function loadData(show = true) {
   setLoading(show);
 
