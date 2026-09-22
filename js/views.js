@@ -2792,6 +2792,7 @@ function calendarItemsForDate(iso) {
       items.push({
         id: o.id,
         cellClass: '',
+        filterKey: 'due',
         cellText: `${who} 발주`,
         who,
         type: '발주 예정',
@@ -2804,6 +2805,7 @@ function calendarItemsForDate(iso) {
       items.push({
         id: o.id,
         cellClass: 'eventday',
+        filterKey: 'eventday',
         cellText: `${who} 행사`,
         who,
         type: '행사일',
@@ -2821,6 +2823,7 @@ function calendarItemsForDate(iso) {
       items.push({
         id: o.id,
         cellClass: '',
+        filterKey: 'due',
         cellText: `${o.company || o.name || 'B2B'} 발주`,
         who: o.company || o.name || 'B2B',
         type: 'B2B 발주',
@@ -2889,6 +2892,7 @@ function calendarItemsForDate(iso) {
     items.push({
       id: o.id,
       cellClass: `shipped ${o._class}`,
+      filterKey: o._class,
       cellText: `${o._kind} · ${who}`,
       who,
       type: `${o._kind} 발송 완료`,
@@ -2897,7 +2901,11 @@ function calendarItemsForDate(iso) {
     });
   });
 
-  return items;
+  const filter = state.calFilter || 'all';
+
+  return filter === 'all'
+    ? items
+    : items.filter(x => x.filterKey === filter);
 }
 
 function calendarSidebarRows(items, iso) {
@@ -3127,49 +3135,28 @@ function renderCalendar() {
 
         <div class="cal-legend">
 
-          <div class="legend-group">예정</div>
-
-          <div class="legend-item">
-            <span class="legend-dot due"></span>
-            <span>발주 예정일</span>
-          </div>
-
-          <div class="legend-item">
-            <span class="legend-dot eventday"></span>
-            <span>행사일</span>
-          </div>
-
-          <div class="legend-group">완료</div>
-
-          <div class="legend-item">
-            <span class="legend-dot sponsor"></span>
-            <span>협찬</span>
-          </div>
-
-          <div class="legend-item">
-            <span class="legend-dot amb"></span>
-            <span>엠베서더</span>
-          </div>
-
-          <div class="legend-item">
-            <span class="legend-dot event"></span>
-            <span>이벤트</span>
-          </div>
-
-          <div class="legend-item">
-            <span class="legend-dot sample"></span>
-            <span>샘플</span>
-          </div>
-
-          <div class="legend-item">
-            <span class="legend-dot b2b"></span>
-            <span>B2B</span>
-          </div>
-
-          <div class="legend-item">
-            <span class="legend-dot olive"></span>
-            <span>올리브영</span>
-          </div>
+          ${
+            [
+              { group: '',     key: 'all',      label: '전체' },
+              { group: '예정', key: 'due',      label: '발주 예정일' },
+              { group: '',     key: 'eventday', label: '행사일' },
+              { group: '완료', key: 'sponsor',  label: '협찬' },
+              { group: '',     key: 'amb',      label: '엠베서더' },
+              { group: '',     key: 'event',    label: '이벤트' },
+              { group: '',     key: 'sample',   label: '샘플' },
+              { group: '',     key: 'b2b',      label: 'B2B' },
+              { group: '',     key: 'olive',    label: '올리브영' }
+            ].map(f => `
+              ${f.group ? `<div class="legend-group">${f.group}</div>` : ''}
+              <button
+                class="legend-item ${(state.calFilter || 'all') === f.key ? 'on' : ''}"
+                data-cal-filter="${f.key}"
+              >
+                <span class="legend-dot ${f.key}"></span>
+                <span>${f.label}</span>
+              </button>
+            `).join('')
+          }
 
         </div>
 
@@ -7170,6 +7157,15 @@ document.addEventListener(
       state.editing = false;
 
       renderDrawer();
+      return;
+    }
+
+    const calFilter =
+      e.target.closest('[data-cal-filter]');
+
+    if (calFilter) {
+      state.calFilter = calFilter.dataset.calFilter;
+      render();
       return;
     }
 

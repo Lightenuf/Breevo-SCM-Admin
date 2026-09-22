@@ -2543,3 +2543,63 @@ textarea.field {
 .days .day:nth-last-child(-n + 7) {
   border-bottom: 0;
 }
+
+/* =========================
+   달력 왼쪽 필터 (선택 가능)
+   ========================= */
+
+.cal-legend .legend-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 5px 8px 5px 2px;
+  border-radius: 8px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.cal-legend .legend-item:hover {
+  background: var(--soft);
+}
+
+.cal-legend .legend-item.on {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.legend-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 1.5px solid var(--dot, #D8D2CF);
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.legend-item.on .legend-dot {
+  background: var(--dot, #C9BFBB) !important;
+  border-color: var(--dot, #C9BFBB);
+}
+
+.legend-item.on .legend-dot::after {
+  content: "✓";
+  font-size: 9px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+
+.legend-dot.all      { --dot: #B9B1AD; }
+.legend-dot.due      { --dot: #E1414C; }
+.legend-dot.eventday { --dot: #C4BAB6; }
+.legend-dot.sponsor  { --dot: #6E9CC9; }
+.legend-dot.amb      { --dot: #9B85BE; }
+.legend-dot.event    { --dot: #A79B96; }
+.legend-dot.sample   { --dot: #E0BF5A; }
+.legend-dot.b2b      { --dot: #6FAE99; }
+.legend-dot.olive    { --dot: #93AE79; }
