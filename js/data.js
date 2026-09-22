@@ -811,13 +811,18 @@ async function gasHold(id, hold) {
       ? '보류'
       : (order.kind === 'sponsor' ? '발주 대기' : '출고 대기');
 
-    return sampleDelay({ success: true }, 120);
+    return sampleDelay(sampleData(), 120);
   }
 
-  return upsertOverride(id, {
+  await upsertOverride(id, {
     hold: !!hold,
     status: hold ? '보류' : ''
   });
+
+  /* 원본 setOrderHold 는 getAdminData() 를 그대로 돌려줍니다.
+     화면이 setAdminData(await gasHold(...)) 로 바로 받기 때문에
+     { success, data } 로 감싸면 안 됩니다. */
+  return fetchAdminData();
 }
 
 async function gasCancel(ids) {
@@ -831,7 +836,7 @@ async function gasCancel(ids) {
       order.status = order.kind === 'sponsor' ? '발주 대기' : '출고 대기';
     });
 
-    return sampleDelay({ success: true }, 120);
+    return sampleDelay(sampleData(), 120);
   }
 
   for (const id of (ids || [])) {
@@ -842,7 +847,8 @@ async function gasCancel(ids) {
     });
   }
 
-  return { success: true, data: await fetchAdminData() };
+  /* 원본 cancelOrderDone 과 동일하게 데이터 객체를 그대로 돌려줍니다. */
+  return fetchAdminData();
 }
 
 async function gasComplete(ids) {
@@ -855,6 +861,7 @@ async function gasComplete(ids) {
 
       order.doneAt = stamp;
       order.sheetAt = stamp;
+      order.hold = false;
       order.status = order.kind === 'sponsor' ? '발주 완료' : '출고 완료';
     });
 
@@ -869,7 +876,10 @@ async function gasComplete(ids) {
     await upsertOverride(id, {
       status: kind === 'sponsor' ? '발주 완료' : '출고 완료',
       sheetCreatedAt: stamp,
-      doneAt: stamp
+      doneAt: stamp,
+      /* 원본과 동일하게 완료 시 보류를 함께 내립니다.
+         상태 계산에서 보류가 완료보다 우선이라, 빠뜨리면 완료된 건이 계속 보류로 보입니다. */
+      hold: false
     });
   }
 
