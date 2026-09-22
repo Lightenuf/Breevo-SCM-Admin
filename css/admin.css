@@ -2603,3 +2603,8 @@ textarea.field {
 .legend-dot.sample   { --dot: #E0BF5A; }
 .legend-dot.b2b      { --dot: #6FAE99; }
 .legend-dot.olive    { --dot: #93AE79; }
+
+/* 일정이 적어도 달력 폭이 줄어들지 않도록 항상 폭을 채웁니다 */
+.calendar-wrap {
+  width: 100%;
+}

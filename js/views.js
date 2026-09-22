@@ -2901,6 +2901,39 @@ function calendarItemsForDate(iso) {
     });
   });
 
+  /* 올리브영은 상태값이 다른 채널과 달라(미다운로드 / 다운로드 완료)
+     별도로 달력에 올립니다.
+     다운로드를 마친 건은 다운로드 일시에, 아직인 건은 업로드 일시에 표시합니다. */
+  (state.data.olive || []).forEach(o => {
+    const done =
+      o.status === '다운로드 완료';
+
+    const at =
+      dateTimeIso(
+        done ? o.downloadedAt : o.uploadedAt
+      );
+
+    if (at !== iso) {
+      return;
+    }
+
+    const count =
+      o.orderCount || 0;
+
+    items.push({
+      id: o.id,
+      cellClass: done ? 'shipped olive' : '',
+      filterKey: 'olive',
+      cellText: done
+        ? `올리브영 · ${count}건`
+        : `올리브영 ${count}건 발주`,
+      who: `올리브영 ${count}건`,
+      type: done ? '올리브영 발주 완료' : '올리브영 발주 대기',
+      meta: `사과 ${o.appleQty || 0} · 복숭아 ${o.peachQty || 0}`,
+      status: o.status || ''
+    });
+  });
+
   const filter = state.calFilter || 'all';
 
   return filter === 'all'
@@ -3135,19 +3168,20 @@ function renderCalendar() {
 
         <div class="cal-legend">
 
+          <div class="legend-group">필터</div>
+
           ${
             [
-              { group: '',     key: 'all',      label: '전체' },
-              { group: '예정', key: 'due',      label: '발주 예정일' },
-              { group: '',     key: 'eventday', label: '행사일' },
-              { group: '완료', key: 'sponsor',  label: '협찬' },
-              { group: '',     key: 'amb',      label: '엠베서더' },
-              { group: '',     key: 'event',    label: '이벤트' },
-              { group: '',     key: 'sample',   label: '샘플' },
-              { group: '',     key: 'b2b',      label: 'B2B' },
-              { group: '',     key: 'olive',    label: '올리브영' }
+              { key: 'all',      label: '전체' },
+              { key: 'due',      label: '발주 예정일' },
+              { key: 'eventday', label: '행사일' },
+              { key: 'sponsor',  label: '협찬' },
+              { key: 'amb',      label: '엠베서더' },
+              { key: 'event',    label: '이벤트' },
+              { key: 'sample',   label: '샘플' },
+              { key: 'b2b',      label: 'B2B' },
+              { key: 'olive',    label: '올리브영' }
             ].map(f => `
-              ${f.group ? `<div class="legend-group">${f.group}</div>` : ''}
               <button
                 class="legend-item ${(state.calFilter || 'all') === f.key ? 'on' : ''}"
                 data-cal-filter="${f.key}"
@@ -7151,9 +7185,20 @@ document.addEventListener(
       e.target.closest('[data-open]');
 
     if (open) {
-      state.drawer =
+      const openId =
         open.dataset.open;
 
+      /* 올리브영은 일반 주문과 구조가 달라 상세 창 대신
+         올리브영 화면(발주 이력)으로 이동합니다. */
+      if (String(openId).startsWith('olive::')) {
+        state.drawer = null;
+        state.calSelectedDate = null;
+        state.page = 'olive';
+        render();
+        return;
+      }
+
+      state.drawer = openId;
       state.editing = false;
 
       renderDrawer();
