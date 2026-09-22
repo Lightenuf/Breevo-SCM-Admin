@@ -20,9 +20,11 @@ CLIENT_FILE = os.path.join(SECRET_DIR, 'google-oauth-client.json')
 TOKEN_FILE = os.path.join(SECRET_DIR, 'google-refresh-token.json')
 
 REDIRECT = 'http://localhost:4455'
+# 기존 어드민(Apps Script)의 DriveApp 과 같은 수준입니다.
+# 기존 출고/입고 요청서 폴더에 저장하려면 drive.file(앱이 만든 파일만)로는 부족합니다.
 SCOPES = (
     'https://www.googleapis.com/auth/gmail.send '
-    'https://www.googleapis.com/auth/drive.file'
+    'https://www.googleapis.com/auth/drive'
 )
 
 received = {}
@@ -73,7 +75,10 @@ def main():
         'response_type': 'code',
         'scope': SCOPES,
         'access_type': 'offline',
-        'prompt': 'consent',
+        # 계정 선택 화면을 항상 띄웁니다.
+        # (브라우저에 다른 구글 계정이 로그인돼 있으면 승인이 거부됩니다)
+        'prompt': 'consent select_account',
+        'login_hint': 'scm@lightenuf.com',
     })
 
     print()
