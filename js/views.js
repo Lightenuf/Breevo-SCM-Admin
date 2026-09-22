@@ -410,13 +410,13 @@ function render() {
             </svg>
           </button>
 
-          <!-- 새로고침 -->
+          <!-- 로그아웃 -->
           <button
-            class="icon-btn"
-            data-action="refresh"
-            title="새로고침"
+            class="topbar-logout"
+            data-action="sign-out"
+            title="로그아웃"
           >
-            ↻
+            로그아웃
           </button>
 
         </div>
@@ -7744,9 +7744,10 @@ document.addEventListener(
       state.shipmentDraft = null;
       render();
 
-    } else if (act === 'refresh') {
-      state.alertOpen = false;
-      loadData(true);
+    } else if (act === 'sign-out') {
+      if (window.confirm('로그아웃하시겠습니까?')) {
+        signOutAdmin();
+      }
 
     } else if (
       act === 'toggle-filter'

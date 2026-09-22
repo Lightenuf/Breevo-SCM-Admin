@@ -133,7 +133,7 @@ async function startAdmin() {
   await loadShipmentRecipients();
 
   const script = document.createElement('script');
-  script.src = 'js/views.js';
+  script.src = 'js/views.js?v=202609221523';
   document.body.appendChild(script);
 }
 

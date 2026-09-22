@@ -2615,3 +2615,26 @@ textarea.field {
 .drawer-bg.no-anim .drawer {
   animation: none;
 }
+
+/* 로그아웃 버튼 (상단 우측)
+   login.css 에 이미 .logout-btn 이 있어 이름을 다르게 둡니다. */
+.topbar-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid #231D1C;
+  background: #231D1C;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.topbar-logout:hover {
+  opacity: .88;
+}
