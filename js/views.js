@@ -2958,9 +2958,17 @@ function renderCalendar() {
   const cells = [];
   const MAX_VISIBLE = 3;
 
+  /* 이번 달을 담는 데 필요한 주 수만 그립니다.
+     (항상 6주를 그리면 아래에 빈 줄이 남습니다) */
+  const daysInMonth =
+    new Date(y, m + 1, 0).getDate();
+
+  const totalCells =
+    Math.ceil((first.getDay() + daysInMonth) / 7) * 7;
+
   for (
     let i = 0;
-    i < 42;
+    i < totalCells;
     i++
   ) {
     const dt =
@@ -3089,46 +3097,78 @@ function renderCalendar() {
         <div class="cal-top">
 
           <button
+            class="cal-arrow"
+            data-action="cal-prev"
+          >
+            ‹
+          </button>
+
+          <span class="cal-month">
+            ${y}년 ${m + 1}월
+          </span>
+
+          <button
+            class="cal-arrow"
+            data-action="cal-next"
+          >
+            ›
+          </button>
+
+          <button
             class="cal-today-btn"
             data-action="cal-today"
           >
             오늘
           </button>
 
-          <div class="cal-title">
+        </div>
 
-            <button
-              class="cal-arrow"
-              data-action="cal-prev"
-            >
-              ‹
-            </button>
+        <div class="cal-body">
 
-            <span>
-              ${y}년 ${m + 1}월
-            </span>
+        <div class="cal-legend">
 
-            <button
-              class="cal-arrow"
-              data-action="cal-next"
-            >
-              ›
-            </button>
+          <div class="legend-group">예정</div>
 
+          <div class="legend-item">
+            <span class="legend-dot due"></span>
+            <span>발주 예정일</span>
           </div>
 
-          <div class="cal-legend">
+          <div class="legend-item">
+            <span class="legend-dot eventday"></span>
+            <span>행사일</span>
+          </div>
 
-            <div class="legend-item">
-              <span class="legend-box due"></span>
-              <span>발주 예정일</span>
-            </div>
+          <div class="legend-group">완료</div>
 
-            <div class="legend-item">
-              <span class="legend-box event"></span>
-              <span>행사일</span>
-            </div>
+          <div class="legend-item">
+            <span class="legend-dot sponsor"></span>
+            <span>협찬</span>
+          </div>
 
+          <div class="legend-item">
+            <span class="legend-dot amb"></span>
+            <span>엠베서더</span>
+          </div>
+
+          <div class="legend-item">
+            <span class="legend-dot event"></span>
+            <span>이벤트</span>
+          </div>
+
+          <div class="legend-item">
+            <span class="legend-dot sample"></span>
+            <span>샘플</span>
+          </div>
+
+          <div class="legend-item">
+            <span class="legend-dot b2b"></span>
+            <span>B2B</span>
+          </div>
+
+          <div class="legend-item">
+            <span class="legend-dot olive"></span>
+            <span>올리브영</span>
           </div>
 
         </div>
@@ -3150,76 +3190,44 @@ function renderCalendar() {
           </div>
 
         </div>
+        </div>
       </div>
 
-      <div class="card upcoming">
+      ${
+        selectedIso
+          ? `
+            <div class="cal-popup-bg" data-action="cal-close"></div>
 
-        <div class="upcoming-title">
-          다가오는 일정
-        </div>
+            <div class="cal-popup">
 
-        <div class="upcoming-desc">
-          ${
-            selectedIso
-              ? `${Number(selectedParts[1])}월 ${Number(selectedParts[2])}일 일정 · ${selectedItems.length}건`
-              : '발주 예정일 기준 7일 · 날짜를 선택하면 해당 날짜 전체 일정을 볼 수 있습니다.'
-          }
-        </div>
+              <div class="cal-popup-top">
+                <div>
+                  <div class="cal-popup-date">
+                    ${Number(selectedParts[1])}월 ${Number(selectedParts[2])}일
+                  </div>
+                  <div class="cal-popup-count">
+                    일정 ${selectedItems.length}건
+                  </div>
+                </div>
 
-        ${
-          selectedIso
-            ? calendarSidebarRows(
-                selectedItems,
-                selectedIso
-              )
-            : (
-                upcoming.length
-                  ? upcoming.map(
-                      (o,index) => {
-                        const p =
-                          o.dueDate.split('-');
+                <button class="cal-popup-close" data-action="cal-close">
+                  &times;
+                </button>
+              </div>
 
-                        const isToday =
-                          o.dueDate === todayIso();
+              <div class="cal-popup-body">
+                ${
+                  calendarSidebarRows(
+                    selectedItems,
+                    selectedIso
+                  )
+                }
+              </div>
 
-                        return `
-                          <div
-                            class="up-row ${index === 0 ? 'first' : ''}"
-                            data-open="${esc(o.id)}"
-                          >
-                            <div class="datebox ${isToday ? 'hot' : ''}">
-                              <span class="datebox-month">
-                                ${Number(p[1])}월
-                              </span>
-                              <span class="datebox-day">
-                                ${Number(p[2])}
-                              </span>
-                            </div>
-
-                            <div style="min-width:0">
-                              <div class="up-name">
-                                ${esc(o.insta || o.name || '—')}
-                              </div>
-
-                              <div class="up-meta">
-                                ${o.qty}캔 · ${esc(o.flavorLabel || '—')} · 행사 ${shortDate(o.eventDate)}
-                              </div>
-
-                              ${badge(o.status)}
-                            </div>
-                          </div>
-                        `;
-                      }
-                    ).join('')
-                  : `
-                      <div class="empty">
-                        7일 내 발주 예정 건이 없습니다.
-                      </div>
-                    `
-              )
-        }
-
-      </div>
+            </div>
+          `
+          : ''
+      }
     </div>
   `;
 }
@@ -7810,6 +7818,12 @@ document.addEventListener(
       state.calMonth = m - 1;
       state.calSelectedDate = todayIso();
 
+      render();
+
+    } else if (
+      act === 'cal-close'
+    ) {
+      state.calSelectedDate = null;
       render();
     }
   }
