@@ -2782,7 +2782,15 @@ function calendarItemsForDate(iso) {
       o.name ||
       '—';
 
-    if (o.dueDate === iso) {
+    /* 이미 발주가 끝난 건은 '발주 예정'으로 표시하지 않습니다.
+       수동 등록 협찬은 행사 날짜가 없어 발주 예정일이 매일 '오늘'로
+       다시 계산되는데, 그대로 두면 몇 주 전 끝난 건이 매일 오늘 칸에
+       따라다닙니다. 완료일 칸의 '협찬 · ○○' 표시는 그대로 남습니다.
+       B2B는 원래부터 완료 건을 거르고 있어 방식을 맞췄습니다. */
+    if (
+      o.dueDate === iso &&
+      o.status !== '발주 완료'
+    ) {
       items.push({
         id: o.id,
         cellClass: '',
