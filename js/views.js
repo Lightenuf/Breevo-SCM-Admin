@@ -119,23 +119,26 @@ async function loadData(show = true) {
   }
 }
 
+/* 로딩 표시와 토스트 알림은 상세창과 다른 칸에 그립니다.
+   예전에는 셋이 #overlay 한 칸을 서로 덮어써서,
+   토스트가 2.6초 뒤 사라질 때 열려 있던 상세창까지 같이 지워졌습니다. */
+function layerRoot(id) {
+  let el = document.getElementById(id);
+
+  if (!el) {
+    el = document.createElement('div');
+    el.id = id;
+    document.body.appendChild(el);
+  }
+
+  return el;
+}
+
 function setLoading(on) {
-  const el =
-    document.getElementById('overlay');
-
-  if (on) {
-    el.innerHTML =
-      '<div class="loading">데이터를 불러오는 중입니다…</div>';
-    return;
-  }
-
-  el.innerHTML = '';
-
-  if (state.drawer) {
-    renderDrawer();
-  } else {
-    renderToast();
-  }
+  layerRoot('loadingLayer').innerHTML =
+    on
+      ? '<div class="loading">데이터를 불러오는 중입니다…</div>'
+      : '';
 }
 
 function toast(msg) {
@@ -152,16 +155,7 @@ function toast(msg) {
 }
 
 function renderToast() {
-  const el =
-    document.getElementById('overlay');
-
-  if (
-    document.querySelector('.loading')
-  ) {
-    return;
-  }
-
-  el.innerHTML =
+  layerRoot('toastLayer').innerHTML =
     state.notice
       ? `
         <div class="toast">
@@ -3585,12 +3579,17 @@ function findOrder(id) {
    상세 Drawer
    ========================= */
 
+/* 지금 화면에 떠 있는 상세창이 어느 건인지 기억해둡니다.
+   같은 건을 다시 그릴 때 열림 애니메이션을 건너뛰기 위함입니다. */
+let shownDrawerId = null;
+
 function renderDrawer() {
   const root =
     document.getElementById('overlay');
 
   if (!state.drawer) {
-    renderToast();
+    shownDrawerId = null;
+    root.innerHTML = '';
     return;
   }
 
@@ -3599,9 +3598,17 @@ function renderDrawer() {
 
   if (!o) {
     state.drawer = null;
-    renderToast();
+    shownDrawerId = null;
+    root.innerHTML = '';
     return;
   }
+
+  /* 이미 열려 있던 상세창이면 애니메이션 없이 내용만 갈아끼웁니다.
+     저장할 때마다 창이 다시 밀려나오는 것처럼 보이던 문제를 막습니다. */
+  const alreadyOpen =
+    shownDrawerId === state.drawer;
+
+  shownDrawerId = state.drawer;
 
   const isSponsor =
     o.kind === 'sponsor';
@@ -3631,7 +3638,7 @@ function renderDrawer() {
           );
 
   root.innerHTML = `
-    <div class="drawer-bg">
+    <div class="drawer-bg${alreadyOpen ? ' no-anim' : ''}">
 
       <div
         style="flex:1"

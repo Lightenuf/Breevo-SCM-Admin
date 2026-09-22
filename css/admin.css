@@ -2608,3 +2608,10 @@ textarea.field {
 .calendar-wrap {
   width: 100%;
 }
+
+/* 이미 열려 있는 상세창을 다시 그릴 때는 열림 애니메이션을 재생하지 않습니다.
+   저장할 때마다 창이 다시 밀려나오는 것처럼 보이던 문제를 막습니다. */
+.drawer-bg.no-anim,
+.drawer-bg.no-anim .drawer {
+  animation: none;
+}
