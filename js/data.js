@@ -1002,10 +1002,47 @@ async function gasPreview(ids) {
 }
 
 /* =========================
-   6. 입고 / 출고 요청서 파일 저장 (Google Drive)
+   6~7. 요청서 Drive 저장 · SCM 메일 발송
+   브라우저에 인증 정보를 두지 않기 위해 Supabase 서버 기능을 거칩니다.
    ========================= */
 
-function gasSaveShipmentRequestFile(payload) {
+async function callScmFunction(payload) {
+  const { data: session } = await supabaseClient.auth.getSession();
+  const token = session?.session?.access_token;
+
+  if (!token) {
+    throw new Error('로그인이 필요합니다. 새로고침 후 다시 로그인해주세요.');
+  }
+
+  const res = await fetch(
+    `${BREEVO_CONFIG.SUPABASE_URL}/functions/v1/send-scm-mail`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'apikey': BREEVO_CONFIG.SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  let result;
+
+  try {
+    result = await res.json();
+  } catch {
+    throw new Error('서버 응답을 읽지 못했습니다. 잠시 후 다시 시도해주세요.');
+  }
+
+  if (!res.ok || !result?.success) {
+    throw new Error(result?.message || '요청을 처리하지 못했습니다.');
+  }
+
+  return result;
+}
+
+async function gasSaveShipmentRequestFile(payload) {
   if (IS_SAMPLE_MODE) {
     return Promise.reject(
       new Error(
@@ -1014,10 +1051,16 @@ function gasSaveShipmentRequestFile(payload) {
       )
     );
   }
-  return notConnected('출고 요청서 저장');
+
+  return callScmFunction({
+    mode: 'save',
+    requestType: 'outbound',
+    base64: payload?.base64,
+    fileName: payload?.fileName || shipmentRequestFileNameOf('outbound'),
+  });
 }
 
-function gasSaveInboundRequestFile(payload) {
+async function gasSaveInboundRequestFile(payload) {
   if (IS_SAMPLE_MODE) {
     return Promise.reject(
       new Error(
@@ -1026,14 +1069,27 @@ function gasSaveInboundRequestFile(payload) {
       )
     );
   }
-  return notConnected('입고 요청서 저장');
+
+  return callScmFunction({
+    mode: 'save',
+    requestType: 'inbound',
+    base64: payload?.base64,
+    fileName: payload?.fileName || shipmentRequestFileNameOf('inbound'),
+  });
 }
 
-/* =========================
-   7. SCM 메일 발송
-   ========================= */
+/* 파일명은 화면이 쓰는 규칙(requestPreviewFileName)을 그대로 따릅니다. */
+function shipmentRequestFileNameOf(type) {
+  if (typeof requestPreviewFileName === 'function') {
+    return requestPreviewFileName();
+  }
 
-function gasSaveAndSendRequestEmail(payload) {
+  const t = todayIsoKst().replace(/-/g, '').slice(2);
+  const label = type === 'inbound' ? '입고요청서' : '출고요청서';
+  return `라이트이너프_${label}_${t}.xlsx`;
+}
+
+async function gasSaveAndSendRequestEmail(payload) {
   if (IS_SAMPLE_MODE) {
     return Promise.reject(
       new Error(
@@ -1042,7 +1098,18 @@ function gasSaveAndSendRequestEmail(payload) {
       )
     );
   }
-  return notConnected('메일 발송');
+
+  const type = payload?.requestType === 'inbound' ? 'inbound' : 'outbound';
+
+  return callScmFunction({
+    mode: 'send',
+    requestType: type,
+    base64: payload?.base64,
+    fileName: payload?.fileName || shipmentRequestFileNameOf(type),
+    subject: payload?.subject,
+    body: payload?.body,
+    cc: payload?.cc,
+  });
 }
 
 /* =========================
